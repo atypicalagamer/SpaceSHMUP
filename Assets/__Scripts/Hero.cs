@@ -68,27 +68,43 @@ public class Hero : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        GameObject go = other.gameObject;
+    
+        ProjectileEnemy pE = go.GetComponent<ProjectileEnemy>();
+        if (pE != null)
+        {
+            float damage = Main.GET_WEAPON_DEFINITION(pE.type).damageOnHit;
+
+            shieldLevel -= damage; 
+            Destroy(go); // Destroy the enemy projectile
+            lastTriggerGo = go; // Set the last triggered object
+            return;
+        }
+
         Transform rootT = other.gameObject.transform.root;
-        GameObject go = rootT.gameObject;
+        GameObject enemyRoot = rootT.gameObject;
 
-        // Make sure it's not the same triggering go as last time
-        if (go == lastTriggerGo) return;
-        lastTriggerGo = go;
-
-        Enemy enemy = go.GetComponent<Enemy>();
+        Enemy enemy = enemyRoot.GetComponent<Enemy>();
+        if (enemy != null) 
+        {
+            // This is a direct ship-to-ship collision
+            shieldLevel--; 
+            Destroy(enemyRoot); // Destroy the entire enemy ship
+            lastTriggerGo = enemyRoot;
+            return;
+        }
+    
         PowerUp pUp = go.GetComponent<PowerUp>();
-        if (enemy != null) // If the shield was triggered by an enemy
+        if (pUp != null)
         {
-            shieldLevel--; // Decrease the level of the shield by 1
-            Destroy(go); // and Destroy the enemy
+            AbsorbPowerUp(pUp); 
+            lastTriggerGo = go;
+            return;
         }
-        else if (pUp != null) // If the shield hit a PowerUp
+
+        if (go != lastTriggerGo)
         {
-            AbsorbPowerUp(pUp); // ... absorb the PowerUp
-        }
-        else
-        {
-            Debug.Log("Shield trigger hit by non-Enemy: " + go.name);
+            Debug.Log("Shield trigger hit by non-Enemy/PowerUp/Projectile: " + go.name);
         }
     }
     

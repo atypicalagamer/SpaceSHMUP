@@ -11,6 +11,9 @@ public class Enemy : MonoBehaviour
     public float health = 10; // Damage needed to destroy this enemy
     public float score = 100; // Points earned for destroying this
     public float powerUpDropChance = 1f; // Chance to drop a PowerUp
+    public GameObject projectilePrefab;
+    public float projectileSpeed = 50;
+    public float shotTime;
 
     protected bool calledShipDestroyed = false;
     protected BoundsCheck bndCheck;
@@ -18,6 +21,7 @@ public class Enemy : MonoBehaviour
     void Awake()
     {
         bndCheck = GetComponent<BoundsCheck>();
+        shotTime = Time.time + 1f / fireRate;
     }
 
     // This is a Property: A method that acts like a field
@@ -38,6 +42,11 @@ public class Enemy : MonoBehaviour
     {
         Move();
 
+        if (Time.time >= shotTime && bndCheck.isOnScreen)
+        {
+            Fire();
+        }
+        
         // Check whether this Enemy has gone off the bottom of the screen
         if (bndCheck.LocIs(BoundsCheck.eScreenLocs.offDown))
         {
@@ -50,6 +59,19 @@ public class Enemy : MonoBehaviour
         Vector3 tempPos = pos;
         tempPos.y -= speed * Time.deltaTime;
         pos = tempPos;
+    }
+
+    public void Fire()
+    {
+        if (projectilePrefab == null) return;
+        shotTime = Time.time + 1f / fireRate;
+        GameObject projGO = Instantiate<GameObject>(projectilePrefab, transform.position, Quaternion.identity);
+        ProjectileEnemy pE = projGO.GetComponent<ProjectileEnemy>();
+        if (pE != null)
+        {
+            pE.SetType(eWeaponType.blaster);
+            pE.vel = Vector3.down * projectileSpeed;
+        }
     }
 
     void OnCollisionEnter(Collision coll)

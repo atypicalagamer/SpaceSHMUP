@@ -83,6 +83,9 @@ MonoBehaviour:
   health: 10
   score: 100
   powerUpDropChance: 0.75
+  projectilePrefab: {fileID: 2497419347223424421, guid: 03cc4868a40dbd84cb65a0644ce407a8, type: 3}
+  projectileSpeed: 50
+  shotTime: 3
   lifeTime: 5
   midpointYRange: {x: 1.5, y: 3}
   drawDebugInfo: 0
